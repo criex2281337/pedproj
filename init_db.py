@@ -18,8 +18,8 @@ def init_database():
             streak INTEGER DEFAULT 0,
             last_login DATE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            target_language VARCHAR(50) DEFAULT 'English',
-            native_language VARCHAR(50) DEFAULT 'Russian'
+            target_language VARCHAR(50) DEFAULT 'Английский',
+            native_language VARCHAR(50) DEFAULT 'Русский'
         )
     ''')
     
@@ -94,13 +94,13 @@ def init_database():
     
     # Добавляем языки
     languages = [
-        ('English', 'en', '🇺🇸'),
-        ('Spanish', 'es', '🇪🇸'),
-        ('French', 'fr', '🇫🇷'),
-        ('German', 'de', '🇩🇪'),
-        ('Italian', 'it', '🇮🇹'),
-        ('Portuguese', 'pt', '🇵🇹'),
-        ('Russian', 'ru', '🇷🇺')
+        ('Английский', 'en', '🇺🇸'),
+        ('Испанский', 'es', '🇪🇸'),
+        ('Французский', 'fr', '🇫🇷'),
+        ('Немецкий', 'de', '🇩🇪'),
+        ('Итальянский', 'it', '🇮🇹'),
+        ('Португальский', 'pt', '🇵🇹'),
+        ('Русский', 'ru', '🇷🇺')
     ]
     
     cursor.executemany(
@@ -111,14 +111,12 @@ def init_database():
     # Добавляем уроки для английского
     english_id = 1
     lessons_data = [
-        (english_id, 'Basics 1', 'Learn basic words and phrases', 1, 1, 10),
-        (english_id, 'Basics 2', 'More basic vocabulary', 1, 2, 10),
-        (english_id, 'Greetings', 'Learn how to greet people', 1, 3, 15),
-        (english_id, 'Food', 'Food and restaurant vocabulary', 2, 4, 20),
-        (english_id, 'Animals', 'Animal names and descriptions', 2, 5, 20),
-        (english_id, 'Travel', 'Travel and transportation', 3, 6, 25),
-        (english_id, 'Business', 'Business and work vocabulary', 3, 7, 25),
-        (english_id, 'Medical', 'Medical terms and phrases', 4, 8, 30),
+        (english_id, 'Основы 1', 'Выучи основные слова', 1, 1, 10),
+        (english_id, 'Основы 2', 'Простые фразы', 1, 2, 10),
+        (english_id, 'Приветствия', 'Научись приветствовать людей', 1, 3, 15),
+        (english_id, 'Еда', 'Слова о еде', 2, 4, 20),
+        (english_id, 'Животные', 'Названия животных', 2, 5, 20),
+        (english_id, 'Семья', 'Члены семьи', 2, 6, 20),
     ]
     
     cursor.executemany(
@@ -126,26 +124,72 @@ def init_database():
         lessons_data
     )
     
-    # Добавляем упражнения
+    # Добавляем упражнения ТОЛЬКО с множественным выбором и сопоставлением
     exercises_data = [
-        # Basics 1
-        (1, 'translation', 'Hello', 'Привет', None, None, 'Basic greeting', 1),
-        (1, 'translation', 'Goodbye', 'До свидания', None, None, 'Farewell expression', 2),
-        (1, 'translation', 'Thank you', 'Спасибо', None, None, 'Expression of gratitude', 3),
-        (1, 'translation', 'Please', 'Пожалуйста', None, None, 'Polite request', 4),
-        (1, 'multiple_choice', 'Apple', 'Яблоко', '["Яблоко", "Апельсин", "Банан", "Груша"]', None, 'Common fruit', 5),
-        (1, 'multiple_choice', 'Book', 'Книга', '["Книга", "Ручка", "Стол", "Стул"]', None, 'Reading material', 6),
+        # Основы 1 - Выбери перевод
+        (1, 'multiple_choice', 'Выбери перевод слова "Привет"', 'Hello', '["Hello", "Goodbye", "Thank you", "Please"]', None, 'Hello - приветствие на английском', 1),
+        (1, 'multiple_choice', 'Выбери перевод слова "Спасибо"', 'Thank you', '["Thank you", "Please", "Sorry", "Yes"]', None, 'Thank you - выражение благодарности', 2),
+        (1, 'multiple_choice', 'Выбери перевод слова "Да"', 'Yes', '["Yes", "No", "Maybe", "OK"]', None, 'Yes - утвердительный ответ', 3),
+        (1, 'multiple_choice', 'Выбери перевод слова "Нет"', 'No', '["No", "Yes", "Not", "Never"]', None, 'No - отрицательный ответ', 4),
+        (1, 'multiple_choice', 'Выбери перевод слова "Пожалуйста"', 'Please', '["Please", "Thank you", "You are welcome", "Sorry"]', None, 'Please - вежливая просьба', 5),
         
-        # Basics 2
-        (2, 'translation', 'Water', 'Вода', None, None, 'Essential liquid', 1),
-        (2, 'translation', 'House', 'Дом', None, None, 'Living place', 2),
-        (2, 'multiple_choice', 'Car', 'Машина', '["Машина", "Велосипед", "Самолет", "Поезд"]', None, 'Vehicle', 3),
-        (2, 'translation', 'My name is...', 'Меня зовут...', None, None, 'Self-introduction', 4),
+        # Основы 1 - Сопоставь слова
+        (1, 'multiple_choice', 'Сопоставь: "Яблоко"', 'Apple', '["Apple", "Orange", "Banana", "Grape"]', None, 'Apple - яблоко', 6),
+        (1, 'multiple_choice', 'Сопоставь: "Вода"', 'Water', '["Water", "Coffee", "Tea", "Juice"]', None, 'Water - вода', 7),
+        (1, 'multiple_choice', 'Сопоставь: "Дом"', 'House', '["House", "Car", "Tree", "Street"]', None, 'House - дом', 8),
+        (1, 'multiple_choice', 'Сопоставь: "Книга"', 'Book', '["Book", "Pen", "Paper", "Notebook"]', None, 'Book - книга', 9),
         
-        # Greetings
-        (3, 'translation', 'How are you?', 'Как дела?', None, None, 'Common greeting question', 1),
-        (3, 'translation', 'Good morning', 'Доброе утро', None, None, 'Morning greeting', 2),
-        (3, 'multiple_choice', 'Good night', 'Спокойной ночи', '["Спокойной ночи", "Добрый день", "Добрый вечер", "Привет"]', None, 'Evening farewell', 3),
+        # Основы 2 - Выбери перевод фраз
+        (2, 'multiple_choice', 'Выбери перевод: "Как дела?"', 'How are you?', '["How are you?", "What is your name?", "Where are you from?", "How old are you?"]', None, 'How are you? - вопрос о состоянии', 1),
+        (2, 'multiple_choice', 'Выбери перевод: "Меня зовут..."', 'My name is...', '["My name is...", "I am from...", "I live in...", "I am... years old"]', None, 'My name is... - представление', 2),
+        (2, 'multiple_choice', 'Выбери перевод: "Я из России"', 'I am from Russia', '["I am from Russia", "I live in Russia", "I like Russia", "I visit Russia"]', None, 'I am from Russia - указание страны происхождения', 3),
+        (2, 'multiple_choice', 'Выбери перевод: "Хорошо"', 'Good', '["Good", "Bad", "OK", "Fine"]', None, 'Good - положительная оценка', 4),
+        
+        # Основы 2 - Сопоставь слова
+        (2, 'multiple_choice', 'Сопоставь: "Машина"', 'Car', '["Car", "Bus", "Train", "Bicycle"]', None, 'Car - автомобиль', 5),
+        (2, 'multiple_choice', 'Сопоставь: "Красный"', 'Red', '["Red", "Blue", "Green", "Yellow"]', None, 'Red - красный цвет', 6),
+        (2, 'multiple_choice', 'Сопоставь: "Большой"', 'Big', '["Big", "Small", "Medium", "Large"]', None, 'Big - большой размер', 7),
+        (2, 'multiple_choice', 'Сопоставь: "Быстрый"', 'Fast', '["Fast", "Slow", "Quick", "Rapid"]', None, 'Fast - высокая скорость', 8),
+        
+        # Приветствия
+        (3, 'multiple_choice', 'Выбери утреннее приветствие', 'Good morning', '["Good morning", "Good afternoon", "Good evening", "Good night"]', None, 'Good morning - доброе утро', 1),
+        (3, 'multiple_choice', 'Выбери вечернее приветствие', 'Good evening', '["Good evening", "Good morning", "Good afternoon", "Good night"]', None, 'Good evening - добрый вечер', 2),
+        (3, 'multiple_choice', 'Как сказать "Приятно познакомиться"?', 'Nice to meet you', '["Nice to meet you", "Nice to see you", "Good to know you", "Happy to meet you"]', None, 'Nice to meet you - при знакомстве', 3),
+        (3, 'multiple_choice', 'Выбери прощание на ночь', 'Good night', '["Good night", "Good evening", "Goodbye", "See you"]', None, 'Good night - спокойной ночи', 4),
+        
+        # Приветствия - вопросы
+        (3, 'multiple_choice', 'Как спросить "Как тебя зовут?"', 'What is your name?', '["What is your name?", "How are you?", "Where are you from?", "How old are you?"]', None, 'What is your name? - вопрос об имени', 5),
+        (3, 'multiple_choice', 'Как спросить "Откуда ты?"', 'Where are you from?', '["Where are you from?", "What is your name?", "How are you?", "What time is it?"]', None, 'Where are you from? - вопрос о происхождении', 6),
+        
+        # Еда
+        (4, 'multiple_choice', 'Сопоставь: "Хлеб"', 'Bread', '["Bread", "Butter", "Cheese", "Milk"]', None, 'Bread - хлеб', 1),
+        (4, 'multiple_choice', 'Сопоставь: "Молоко"', 'Milk', '["Milk", "Water", "Juice", "Coffee"]', None, 'Milk - молоко', 2),
+        (4, 'multiple_choice', 'Сопоставь: "Яйцо"', 'Egg', '["Egg", "Apple", "Banana", "Orange"]', None, 'Egg - яйцо', 3),
+        (4, 'multiple_choice', 'Сопоставь: "Мясо"', 'Meat', '["Meat", "Fish", "Chicken", "Beef"]', None, 'Meat - мясо', 4),
+        
+        # Еда - фразы
+        (4, 'multiple_choice', 'Как сказать "Я голоден"?', 'I am hungry', '["I am hungry", "I am thirsty", "I am tired", "I am happy"]', None, 'I am hungry - выражение голода', 5),
+        (4, 'multiple_choice', 'Как сказать "Это вкусно"?', 'It is delicious', '["It is delicious", "It is bad", "It is OK", "It is terrible"]', None, 'It is delicious - комплимент еде', 6),
+        
+        # Животные
+        (5, 'multiple_choice', 'Сопоставь: "Собака"', 'Dog', '["Dog", "Cat", "Bird", "Fish"]', None, 'Dog - собака', 1),
+        (5, 'multiple_choice', 'Сопоставь: "Кошка"', 'Cat', '["Cat", "Dog", "Mouse", "Rabbit"]', None, 'Cat - кошка', 2),
+        (5, 'multiple_choice', 'Сопоставь: "Птица"', 'Bird', '["Bird", "Fish", "Butterfly", "Bee"]', None, 'Bird - птица', 3),
+        (5, 'multiple_choice', 'Сопоставь: "Рыба"', 'Fish', '["Fish", "Shark", "Dolphin", "Whale"]', None, 'Fish - рыба', 4),
+        
+        # Животные - дикие
+        (5, 'multiple_choice', 'Сопоставь: "Лев"', 'Lion', '["Lion", "Tiger", "Bear", "Wolf"]', None, 'Lion - лев', 5),
+        (5, 'multiple_choice', 'Сопоставь: "Слон"', 'Elephant', '["Elephant", "Giraffe", "Zebra", "Hippo"]', None, 'Elephant - слон', 6),
+        
+        # Семья
+        (6, 'multiple_choice', 'Сопоставь: "Мама"', 'Mother', '["Mother", "Father", "Sister", "Brother"]', None, 'Mother - мать', 1),
+        (6, 'multiple_choice', 'Сопоставь: "Папа"', 'Father', '["Father", "Mother", "Grandfather", "Uncle"]', None, 'Father - отец', 2),
+        (6, 'multiple_choice', 'Сопоставь: "Брат"', 'Brother', '["Brother", "Sister", "Cousin", "Friend"]', None, 'Brother - брат', 3),
+        (6, 'multiple_choice', 'Сопоставь: "Сестра"', 'Sister', '["Sister", "Brother", "Aunt", "Niece"]', None, 'Sister - сестра', 4),
+        
+        # Семья - расширенная
+        (6, 'multiple_choice', 'Сопоставь: "Бабушка"', 'Grandmother', '["Grandmother", "Grandfather", "Mother", "Aunt"]', None, 'Grandmother - бабушка', 5),
+        (6, 'multiple_choice', 'Сопоставь: "Дедушка"', 'Grandfather', '["Grandfather", "Grandmother", "Father", "Uncle"]', None, 'Grandfather - дедушка', 6),
     ]
     
     for exercise in exercises_data:
@@ -155,16 +199,25 @@ def init_database():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', exercise)
     
-    # Добавляем тестового пользователя
-    password_hash = bcrypt.hashpw('password123'.encode('utf-8'), bcrypt.gensalt())
-    cursor.execute('''
-        INSERT OR IGNORE INTO users (username, email, password_hash, xp, streak)
-        VALUES (?, ?, ?, ?, ?)
-    ''', ('testuser', 'test@example.com', password_hash, 150, 7))
+    # Добавляем тестовых пользователей
+    test_users = [
+        ('тестовый', 'test@example.com', 'password123', 150, 7),
+        ('мария', 'maria@example.com', 'password123', 450, 12),
+        ('иван', 'ivan@example.com', 'password123', 890, 25),
+        ('анна', 'anna@example.com', 'password123', 120, 3),
+        ('сергей', 'sergey@example.com', 'password123', 1200, 45),
+    ]
+    
+    for username, email, password, xp, streak in test_users:
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        cursor.execute('''
+            INSERT OR IGNORE INTO users (username, email, password_hash, xp, streak)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (username, email, password_hash, xp, streak))
     
     conn.commit()
     conn.close()
-    print("Database initialized successfully!")
+    print("База данных успешно инициализирована!")
 
 if __name__ == '__main__':
     init_database()
