@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+.lesson-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.lesson-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.lesson-title {
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+}
+
+.lesson-description {
+    color: var(--text-light);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.progress-container {
+    background: var(--white);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.progress-text {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.exercise-counter {
+    color: var(--text-light);
+    font-size: 0.875rem;
+}
+
+.exercise {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.exercise-question {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-dark);
+    line-height: 1.4;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.option-btn {
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.1rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.option-btn:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.option-btn.selected {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(88, 204, 2, 0.3);
+}
+
+.exercise-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.feedback {
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+    display: none;
+    font-size: 1.1rem;
+}
+
+.feedback.correct {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #c3e6cb;
+}
+
+.feedback.incorrect {
+    background: #f8d7da;
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+}
+
+.explanation {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    font-style: italic;
+    font-size: 1rem;
+}
+
+.hint {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 1rem;
+    font-style: italic;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.exercise {
+    animation: fadeIn 0.5s ease;
+}
+
+.option-btn {
+    animation: fadeIn 0.3s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-container" data-lesson-id="{{ lesson.id }}">
+    <div class="lesson-header">
+        <h1 class="lesson-title">{{ lesson.title }}</h1>
+        <p class="lesson-description">{{ lesson.description }}</p>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-info">
+            <div class="progress-text">Прогресс урока</div>
+            <div class="exercise-counter">
+                Упражнение: <span class="progress-text">1</span>/{{ exercises|length }}
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%"></div>
+        </div>
+    </div>
+
+    {% for exercise in exercises %}
+    <div class="exercise" data-id="{{ exercise.id }}" data-type="{{ exercise.type }}" 
+         data-correct-answer="{{ exercise.correct_answer }}" 
+         data-options="{{ exercise.options|tojson|safe }}"
+         data-explanation="{{ exercise.explanation or '' }}"
+         data-index="{{ loop.index0 }}"
+         {% if loop.index0 != 0 %}style="display: none;"{% endif %}>
+        
+        <div class="exercise-question">{{ exercise.question }}</div>
+        
+        <div class="options-grid">
+            {% for option in exercise.options %}
+            <button class="option-btn" type="button" data-value="{{ option }}">{{ option }}</button>
+            {% endfor %}
+        </div>
+        
+        <div class="hint">
+            💡 Выберите правильный вариант ответа
+        </div>
+        
+        <div class="feedback">
+            <!-- Feedback will be inserted here by JavaScript -->
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="exercise-actions">
+        <button id="checkAnswer" class="btn btn-primary">Проверить ответ</button>
+        <button id="nextExercise" class="btn btn-secondary" style="display: none;">Следующее →</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/lessons.js') }}"></script>
+{% endblock %}
