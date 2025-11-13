@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Изучайте языки бесплатно. Навсегда.</h1>
+            <p>Изучайте английский, испанский, французский и другие языки с помощью веселых интерактивных уроков.</p>
+            <div class="hero-actions">
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Начать учиться</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline">У меня уже есть аккаунт</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Обучение на основе науки</h3>
+                <p>Наши уроки разработаны экспертами по языкам и используют проверенные методы обучения.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Персонализированное обучение</h3>
+                <p>Получайте индивидуальные рекомендации по практике на основе вашего прогресса и целей.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Оставайтесь мотивированными</h3>
+                <p>Зарабатывайте очки, открывайте уровни и создавайте свою серию обучения.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 8rem 0 4rem;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.features-section {
+    padding: 4rem 0;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.feature-card {
+    text-align: center;
+    padding: 2rem;
+}
+
+.feature-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+</style>
+{% endblock %}
