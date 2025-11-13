@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LinguaLearn - Изучение языков{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <a href="{{ url_for('dashboard') }}" class="logo">LinguaLearn</a>
+            {% if 'user_id' in session %}
+            <ul class="nav-links">
+                <li><a href="{{ url_for('dashboard') }}">Обучение</a></li>
+                <li><a href="{{ url_for('lessons_list') }}">Уроки</a></li>
+                <li><a href="{{ url_for('profile') }}">Профиль</a></li>
+                <li class="user-info">
+                    <span class="xp-badge">{{ session.get('xp', 0) }} XP</span>
+                    <span>Привет, {{ session['username'] }}</span>
+                    <a href="{{ url_for('logout') }}">Выйти</a>
+                </li>
+            </ul>
+            {% else %}
+            <ul class="nav-links">
+                <li><a href="{{ url_for('login') }}">Войти</a></li>
+                <li><a href="{{ url_for('register') }}">Регистрация</a></li>
+            </ul>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-info">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
