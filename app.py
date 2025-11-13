@@ -28,8 +28,8 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        native_language = request.form.get('native_language', 'Russian')
-        target_language = request.form.get('target_language', 'English')
+        native_language = request.form.get('native_language', 'Русский')
+        target_language = request.form.get('target_language', 'Английский')
         
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -37,7 +37,7 @@ def register():
         # Проверяем, существует ли пользователь
         cursor.execute('SELECT id FROM users WHERE username = ? OR email = ?', (username, email))
         if cursor.fetchone():
-            flash('Username or email already exists')
+            flash('Имя пользователя или email уже существуют')
             return render_template('auth/register.html')
         
         # Хешируем пароль
@@ -55,7 +55,7 @@ def register():
         
         session['user_id'] = user_id
         session['username'] = username
-        flash('Registration successful!')
+        flash('Регистрация прошла успешно!')
         return redirect(url_for('dashboard'))
     
     return render_template('auth/register.html')
@@ -102,10 +102,10 @@ def login():
             ''', (today.isoformat(), new_streak, user['id']))
             conn.commit()
             
-            flash('Login successful!')
+            flash('Вход выполнен успешно!')
             return redirect(url_for('dashboard'))
         else:
-            flash('Invalid username or password')
+            flash('Неверное имя пользователя или пароль')
         
         conn.close()
     
@@ -210,7 +210,7 @@ def lesson_practice(lesson_id):
     lesson = cursor.fetchone()
     
     if not lesson:
-        flash('Lesson not found')
+        flash('Урок не найден')
         return redirect(url_for('lessons_list'))
     
     cursor.execute('''
@@ -243,14 +243,14 @@ def lesson_practice(lesson_id):
 @app.route('/check_answer', methods=['POST'])
 def check_answer():
     if 'user_id' not in session:
-        return jsonify({'error': 'Not authenticated'}), 401
+        return jsonify({'error': 'Не авторизован'}), 401
     
     data = request.get_json()
     exercise_id = data.get('exercise_id')
     user_answer = data.get('user_answer', '')
     
     if not exercise_id:
-        return jsonify({'error': 'Exercise ID is required'}), 400
+        return jsonify({'error': 'ID упражнения обязателен'}), 400
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -259,9 +259,10 @@ def check_answer():
     exercise = cursor.fetchone()
     
     if not exercise:
-        return jsonify({'error': 'Exercise not found'}), 404
+        return jsonify({'error': 'Упражнение не найдено'}), 404
     
-    is_correct = user_answer.strip().lower() == exercise['correct_answer'].strip().lower()
+    # Для упражнений типа multiple_choice сравниваем текст
+    is_correct = user_answer.strip() == exercise['correct_answer'].strip()
     
     # Сохраняем ответ пользователя
     cursor.execute('''
@@ -282,14 +283,14 @@ def check_answer():
 @app.route('/complete_lesson', methods=['POST'])
 def complete_lesson():
     if 'user_id' not in session:
-        return jsonify({'error': 'Not authenticated'}), 401
+        return jsonify({'error': 'Не авторизован'}), 401
     
     data = request.get_json()
     lesson_id = data.get('lesson_id')
     score = data.get('score', 0)
     
     if not lesson_id:
-        return jsonify({'error': 'Lesson ID is required'}), 400
+        return jsonify({'error': 'ID урока обязателен'}), 400
     
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -298,7 +299,7 @@ def complete_lesson():
     cursor.execute('SELECT xp_reward FROM lessons WHERE id = ?', (lesson_id,))
     lesson = cursor.fetchone()
     if not lesson:
-        return jsonify({'error': 'Lesson not found'}), 404
+        return jsonify({'error': 'Урок не найден'}), 404
         
     xp_reward = lesson['xp_reward']
     
@@ -355,7 +356,11 @@ def profile():
     cursor.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],))
     user = cursor.fetchone()
     
-    # Статистика
+    if not user:
+        flash('Пользователь не найден')
+        return redirect(url_for('login'))
+    
+    # Статистика уроков
     cursor.execute('''
         SELECT COUNT(*) as lessons_completed 
         FROM user_progress 
@@ -363,6 +368,7 @@ def profile():
     ''', (session['user_id'],))
     stats = cursor.fetchone()
     
+    # Статистика упражнений
     cursor.execute('''
         SELECT COUNT(*) as exercises_completed 
         FROM user_answers 
@@ -377,16 +383,28 @@ def profile():
     ''', (session['user_id'],))
     correct_stats = cursor.fetchone()
     
+    # Получаем последние завершенные уроки
+    cursor.execute('''
+        SELECT l.title, up.score, up.completed_at 
+        FROM user_progress up 
+        JOIN lessons l ON up.lesson_id = l.id 
+        WHERE up.user_id = ? AND up.completed = TRUE 
+        ORDER BY up.completed_at DESC 
+        LIMIT 5
+    ''', (session['user_id'],))
+    recent_lessons = cursor.fetchall()
+    
     conn.close()
     
     return render_template('profile.html', 
                          user=user, 
                          stats=stats,
                          exercises_stats=exercises_stats,
-                         correct_stats=correct_stats)
+                         correct_stats=correct_stats,
+                         recent_lessons=recent_lessons)
 
 if __name__ == '__main__':
     if not os.path.exists('database.db'):
-        print("Please run init_db.py first to initialize the database")
+        print("Пожалуйста, сначала запустите init_db.py для инициализации базы данных")
     else:
         app.run(debug=True, host='0.0.0.0', port=5000)
