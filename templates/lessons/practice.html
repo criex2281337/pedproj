@@ -50,21 +50,70 @@
     font-size: 0.875rem;
 }
 
+.phase-indicator {
+    text-align: center;
+    margin: 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
 .exercise {
     background: var(--white);
     border-radius: 16px;
     padding: 2rem;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.learning-exercise {
+    border-left: 6px solid var(--secondary-color);
+}
+
+.practice-exercise {
+    border-left: 6px solid var(--primary-color);
 }
 
 .exercise-question {
     font-size: 1.5rem;
     font-weight: 600;
-    text-align: center;
     margin-bottom: 2rem;
     color: var(--text-dark);
     line-height: 1.4;
+}
+
+.learning-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.word-card {
+    background: linear-gradient(135deg, #58cc02, #46a302);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    font-size: 2rem;
+    font-weight: bold;
+    text-align: center;
+    min-width: 200px;
+}
+
+.translation {
+    font-size: 1.5rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.explanation {
+    background: var(--background-light);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--text-dark);
+    max-width: 500px;
 }
 
 .options-grid {
@@ -111,6 +160,15 @@
     padding: 1rem 2rem;
     font-size: 1.1rem;
     font-weight: 600;
+    cursor: pointer;
+}
+
+.hint {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 1rem;
+    font-style: italic;
 }
 
 .feedback {
@@ -133,34 +191,34 @@
     border: 2px solid #f5c6cb;
 }
 
-.explanation {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(0,0,0,0.1);
-    font-style: italic;
-    font-size: 1rem;
-}
-
-.hint {
-    color: var(--text-light);
-    font-size: 0.9rem;
+.completion-screen {
     text-align: center;
-    margin-top: 1rem;
-    font-style: italic;
+    padding: 3rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
-/* Анимации */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
 }
 
-.exercise {
-    animation: fadeIn 0.5s ease;
+.stat {
+    text-align: center;
 }
 
-.option-btn {
-    animation: fadeIn 0.3s ease;
+.stat-value {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.stat-label {
+    color: var(--text-light);
+    margin-top: 0.5rem;
 }
 </style>
 {% endblock %}
@@ -176,47 +234,98 @@
         <div class="progress-info">
             <div class="progress-text">Прогресс урока</div>
             <div class="exercise-counter">
-                Упражнение: <span class="progress-text">1</span>/{{ exercises|length }}
+                <span id="phaseText">Обучение</span>: 
+                <span class="progress-text" id="currentExercise">1</span>/
+                <span id="totalExercises">{{ learning_exercises|length + practice_exercises|length }}</span>
             </div>
         </div>
         <div class="progress-bar">
-            <div class="progress-fill" style="width: 0%"></div>
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
         </div>
     </div>
 
-    {% for exercise in exercises %}
-    <div class="exercise" data-id="{{ exercise.id }}" data-type="{{ exercise.type }}" 
-         data-correct-answer="{{ exercise.correct_answer }}" 
-         data-options="{{ exercise.options|tojson|safe }}"
-         data-explanation="{{ exercise.explanation or '' }}"
-         data-index="{{ loop.index0 }}"
+    <!-- Фаза обучения -->
+    {% for exercise in learning_exercises %}
+    <div class="exercise learning-exercise" data-exercise-id="{{ exercise.id }}" data-type="learning" data-index="{{ loop.index0 }}"
          {% if loop.index0 != 0 %}style="display: none;"{% endif %}>
         
+        <div class="phase-indicator">🎓 Изучаем новые слова</div>
+        <div class="exercise-question">Запомни перевод:</div>
+        
+        <div class="learning-content">
+            <div class="word-card">
+                {{ exercise.correct_answer }}
+            </div>
+            <div class="translation">
+                ➡️ {{ exercise.question }}
+            </div>
+            {% if exercise.explanation %}
+            <div class="explanation">
+                💡 {{ exercise.explanation }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="hint">
+            Изучи слово и нажми "Далее" чтобы продолжить
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Фаза практики -->
+    {% for exercise in practice_exercises %}
+    <div class="exercise practice-exercise" data-exercise-id="{{ exercise.id }}" data-type="practice" data-index="{{ loop.index0 + learning_exercises|length }}"
+         style="display: none;">
+        
+        <div class="phase-indicator">🎯 Проверяем знания</div>
         <div class="exercise-question">{{ exercise.question }}</div>
         
         <div class="options-grid">
             {% for option in exercise.options %}
-            <button class="option-btn" type="button" data-value="{{ option }}">{{ option }}</button>
+            <div class="option-btn" onclick="selectOption(this)">{{ option }}</div>
             {% endfor %}
         </div>
         
         <div class="hint">
             💡 Выберите правильный вариант ответа
         </div>
-        
-        <div class="feedback">
-            <!-- Feedback will be inserted here by JavaScript -->
+
+        <div class="feedback" id="feedback-{{ exercise.id }}">
+            <!-- Feedback will be inserted here -->
         </div>
     </div>
     {% endfor %}
 
     <div class="exercise-actions">
-        <button id="checkAnswer" class="btn btn-primary">Проверить ответ</button>
-        <button id="nextExercise" class="btn btn-secondary" style="display: none;">Следующее →</button>
+        <button id="nextLearning" class="btn btn-primary" onclick="nextExercise()">Далее →</button>
+        <button id="checkAnswer" class="btn btn-primary" onclick="checkAnswer()" style="display: none;">Проверить ответ</button>
+        <button id="nextPractice" class="btn btn-secondary" onclick="nextExercise()" style="display: none;">Следующее →</button>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/lessons.js') }}"></script>
+<script>
+    // Проверка что упражнения загружены
+    console.log('🔍 Checking exercises...');
+    const exercises = document.querySelectorAll('.exercise');
+    console.log('Exercises found:', exercises.length);
+    
+    exercises.forEach((ex, i) => {
+        console.log(`Exercise ${i}:`, {
+            id: ex.dataset.exerciseId,
+            type: ex.dataset.type,
+            index: ex.dataset.index,
+            displayed: ex.style.display !== 'none'
+        });
+    });
+    
+    // Простая проверка что кнопки работают
+    console.log('Buttons:', {
+        nextLearning: document.getElementById('nextLearning'),
+        checkAnswer: document.getElementById('checkAnswer'),
+        nextPractice: document.getElementById('nextPractice')
+    });
+    </script>
 {% endblock %}
