@@ -377,23 +377,27 @@ def complete_lesson():
         ''', (score, session['user_id'], lesson_id))
         log_debug(f"Обновлен существующий прогресс урока {lesson_id}")
     else:
+        # Создаем новый прогресс
         cursor.execute('''
             INSERT INTO user_progress (user_id, lesson_id, completed, score, completed_at, attempts)
             VALUES (?, ?, TRUE, ?, datetime('now'), 1)
         ''', (session['user_id'], lesson_id, score))
         log_debug(f"Создан новый прогресс урока {lesson_id}")
     
+    # Обновляем XP пользователя
     cursor.execute('''
         UPDATE users SET xp = xp + ? WHERE id = ?
     ''', (xp_reward, session['user_id']))
     
     conn.commit()
     
+    # Получаем обновленные данные пользователя
     cursor.execute('SELECT xp FROM users WHERE id = ?', (session['user_id'],))
     user = cursor.fetchone()
     
     conn.close()
     
+    # Обновляем XP в сессии
     session['xp'] = user['xp']
     
     log_debug(f"Урок завершен: +{xp_reward} XP, всего XP: {user['xp']}")
@@ -404,6 +408,7 @@ def complete_lesson():
         'total_xp': user['xp']
     })
 
+# Профиль пользователя
 @app.route('/profile')
 def profile():
     if 'user_id' not in session:
@@ -421,6 +426,7 @@ def profile():
         flash('Пользователь не найден')
         return redirect(url_for('login'))
     
+    # Статистика уроков
     cursor.execute('''
         SELECT COUNT(*) as lessons_completed 
         FROM user_progress 
@@ -428,6 +434,7 @@ def profile():
     ''', (session['user_id'],))
     stats = cursor.fetchone()
     
+    # Статистика упражнений
     cursor.execute('''
         SELECT COUNT(*) as exercises_completed 
         FROM user_answers 
@@ -442,6 +449,7 @@ def profile():
     ''', (session['user_id'],))
     correct_stats = cursor.fetchone()
     
+    # Получаем последние завершенные уроки
     cursor.execute('''
         SELECT l.title, up.score, up.completed_at 
         FROM user_progress up 
@@ -452,6 +460,7 @@ def profile():
     ''', (session['user_id'],))
     recent_lessons = cursor.fetchall()
     
+    # Получаем общую статистику по урокам
     cursor.execute('''
         SELECT l.title, up.score, up.completed_at
         FROM user_progress up
@@ -473,6 +482,7 @@ def profile():
                          recent_lessons=recent_lessons,
                          all_completed_lessons=all_completed_lessons)
 
+# API для получения статистики
 @app.route('/api/user_stats')
 def user_stats():
     if 'user_id' not in session:
@@ -481,6 +491,7 @@ def user_stats():
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    # Общая статистика
     cursor.execute('SELECT COUNT(*) as total_lessons FROM lessons WHERE language_id = 1')
     total_lessons = cursor.fetchone()['total_lessons']
     
@@ -513,8 +524,10 @@ def user_stats():
         'streak': streak
     })
 
+# Дебаг ручка для проверки JavaScript
 @app.route('/debug_js')
 def debug_js():
+    """Страница для тестирования JavaScript"""
     log_debug("Запрос дебаг страницы JavaScript")
     return '''
     <!DOCTYPE html>
@@ -559,21 +572,25 @@ def debug_js():
     </html>
     '''
 
+# Страница "О проекте"
 @app.route('/about')
 def about():
     log_debug("Страница 'О проекте' запрошена")
     return render_template('about.html')
 
+# Обработчик 404 ошибки
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404
 
+# Обработчик 500 ошибки
 @app.errorhandler(500)
 def internal_error(error):
     conn = get_db_connection()
     conn.close()
     return render_template('500.html'), 500
 
+# Health check для мониторинга
 @app.route('/health')
 def health_check():
     try:
