@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Flask
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Uploads (загруженные фото пользователей)
+static/uploads/*
+!static/uploads/.gitkeep
+!static/uploads/IMG_1890.JPG
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
