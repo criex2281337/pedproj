@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Пользователь: {{ user.email }}{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <div class="glass p-4 mb-4">
+      <h2 class="mb-3"><i class="bi bi-person"></i> {{ user.display_name }} ({{ user.email }})</h2>
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value text-info">{{ user.meals_photo|length }}</div>
+            <div class="stat-label">Блюд (фото)</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value text-warning">{{ user.meals_manual|length }}</div>
+            <div class="stat-label">Блюд (вручную)</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value {% if user.is_admin %}text-warning{% else %}text-secondary{% endif %}">
+              {% if user.is_admin %}Админ{% else %}Пользователь{% endif %}
+            </div>
+            <div class="stat-label">Статус</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value {% if profile and profile.tracking_enabled_at %}text-success{% else %}text-secondary{% endif %}">
+              {% if profile and profile.tracking_enabled_at %}Да{% else %}Нет{% endif %}
+            </div>
+            <div class="stat-label">Трекинг</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="d-flex gap-2">
+        <form method="post" action="{{ url_for('admin_toggle_admin', user_id=user.id) }}" class="d-inline">
+          <button class="btn btn-{% if user.is_admin %}warning{% else %}outline-warning{% endif %}" type="submit">
+            {% if user.is_admin %}<i class="bi bi-shield-x"></i> Убрать админа{% else %}<i class="bi bi-shield-check"></i> Сделать админом{% endif %}
+          </button>
+        </form>
+        <form method="post" action="{{ url_for('admin_delete_user', user_id=user.id) }}" class="d-inline" 
+              onsubmit="return confirm('Вы уверены, что хотите удалить этого пользователя? Это действие нельзя отменить!');">
+          <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i> Удалить пользователя</button>
+        </form>
+        <a class="btn btn-outline-accent" href="{{ url_for('admin_index') }}"><i class="bi bi-arrow-left"></i> Назад</a>
+      </div>
+    </div>
+
+    {% if profile %}
+    <div class="glass p-4 mb-4">
+      <h4 class="mb-3">Профиль</h4>
+      <div class="row g-3">
+        <div class="col-md-3"><strong>Возраст:</strong> {{ profile.age or "—" }}</div>
+        <div class="col-md-3"><strong>Пол:</strong> {{ profile.sex or "—" }}</div>
+        <div class="col-md-3"><strong>Рост:</strong> {{ profile.height_cm or "—" }} см</div>
+        <div class="col-md-3"><strong>Вес:</strong> {{ profile.weight_kg or "—" }} кг</div>
+        <div class="col-md-3"><strong>Активность:</strong> {{ profile.activity or "—" }}</div>
+        <div class="col-md-3"><strong>Цель:</strong> {{ profile.goal or "—" }}</div>
+        <div class="col-md-3"><strong>Трекинг включен:</strong> {{ profile.tracking_enabled_at.strftime("%d.%m.%Y %H:%M") if profile.tracking_enabled_at else "Нет" }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="glass p-4 mb-4">
+      <h4 class="mb-3">Последние блюда (фото)</h4>
+      {% if meals_photo %}
+      <div class="table-responsive">
+        <table class="table table-light-text table-hover">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Название</th>
+              <th>Ккал</th>
+              <th>Б/Ж/У</th>
+              <th>В трекинге</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in meals_photo %}
+            <tr>
+              <td>{{ m.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+              <td>{{ m.dish_name or "—" }}</td>
+              <td>{{ m.calories_kcal|round(0) if m.calories_kcal else "—" }}</td>
+              <td>{{ m.proteins_g|round(0) if m.proteins_g else "—" }}/{{ m.fats_g|round(0) if m.fats_g else "—" }}/{{ m.carbs_g|round(0) if m.carbs_g else "—" }}</td>
+              <td>{% if getattr(m, 'count_in_tracking', True) %}<span class="badge bg-success">Да</span>{% else %}<span class="badge bg-secondary">Нет</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted">Нет блюд по фото.</p>
+      {% endif %}
+    </div>
+
+    <div class="glass p-4">
+      <h4 class="mb-3">Последние блюда (вручную)</h4>
+      {% if meals_manual %}
+      <div class="table-responsive">
+        <table class="table table-light-text table-hover">
+          <thead>
+            <tr>
+              <th>Дата</th>
+              <th>Название</th>
+              <th>Ккал</th>
+              <th>Б/Ж/У</th>
+              <th>В трекинге</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in meals_manual %}
+            <tr>
+              <td>{{ m.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+              <td>{{ m.name }}</td>
+              <td>{{ m.calories_kcal|round(0) }}</td>
+              <td>{{ m.proteins_g|round(0) if m.proteins_g else "—" }}/{{ m.fats_g|round(0) if m.fats_g else "—" }}/{{ m.carbs_g|round(0) if m.carbs_g else "—" }}</td>
+              <td>{% if getattr(m, 'count_in_tracking', True) %}<span class="badge bg-success">Да</span>{% else %}<span class="badge bg-secondary">Нет</span>{% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted">Нет блюд, добавленных вручную.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,109 @@
+
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="glass p-4">
+      <h2 class="mb-3">Профиль и цели</h2>
+      <form method="post">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Возраст</label>
+            <input class="form-control" type="number" name="age" value="{{ prof.age or '' }}" min="10" max="100">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Рост (см)</label>
+            <input class="form-control" type="number" name="height_cm" value="{{ prof.height_cm or '' }}" step="0.1">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Вес (кг)</label>
+            <input class="form-control" type="number" name="weight_kg" value="{{ prof.weight_kg or '' }}" step="0.1">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Пол</label>
+            <select class="form-select" name="sex">
+              <option value="" {% if not prof.sex %}selected{% endif %}>—</option>
+              <option value="male" {% if prof.sex=='male' %}selected{% endif %}>Мужской</option>
+              <option value="female" {% if prof.sex=='female' %}selected{% endif %}>Женский</option>
+              <option value="other" {% if prof.sex=='other' %}selected{% endif %}>Другое</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Активность</label>
+            <select class="form-select" name="activity">
+              <option value="sedentary" {% if prof.activity=='sedentary' %}selected{% endif %}>Сидячая</option>
+              <option value="light" {% if prof.activity=='light' %}selected{% endif %}>Лёгкая</option>
+              <option value="moderate" {% if prof.activity=='moderate' %}selected{% endif %}>Средняя</option>
+              <option value="active" {% if prof.activity=='active' %}selected{% endif %}>Высокая</option>
+              <option value="athlete" {% if prof.activity=='athlete' %}selected{% endif %}>Спорт, каждый день</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Цель</label>
+            <select class="form-select" name="goal">
+              <option value="lose" {% if prof.goal=='lose' %}selected{% endif %}>Снижение веса</option>
+              <option value="maintain" {% if prof.goal=='maintain' %}selected{% endif %}>Поддержание</option>
+              <option value="gain" {% if prof.goal=='gain' %}selected{% endif %}>Набор</option>
+            </select>
+          </div>
+        </div>
+        <details class="mt-3">
+          <summary>Настроить БЖУ вручную (необязательно)</summary>
+          <div class="row g-3 mt-1">
+            <div class="col-md-4">
+              <label class="form-label">Белки, %</label>
+              <input class="form-control" type="number" name="macro_p_pct" value="{{ prof.macro_p_pct or '' }}" step="1">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Жиры, %</label>
+              <input class="form-control" type="number" name="macro_f_pct" value="{{ prof.macro_f_pct or '' }}" step="1">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Углеводы, %</label>
+              <input class="form-control" type="number" name="macro_c_pct" value="{{ prof.macro_c_pct or '' }}" step="1">
+            </div>
+            <p class="text-muted small">Если оставить пустым — применятся разумные значения по цели.</p>
+          </div>
+        </details>
+        <button class="btn btn-accent mt-3" name="action" value="save">Сохранить</button>
+        {% if not prof.tracking_enabled_at %}
+          <button class="btn btn-outline-accent mt-3 ms-2" name="action" value="start_tracking">Включить трекинг целей</button>
+          <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" 
+                title="Трекер помогает следить за дневной нормой калорий и БЖУ. После включения все блюда, отмеченные для трекинга, будут автоматически учитываться в вашей дневной статистике. Вы можете исключить отдельные блюда из трекинга при их добавлении.">
+            <i class="bi bi-question-circle text-muted" style="cursor: help;"></i>
+          </span>
+          <div class="text-muted small mt-2">До включения трекинга «съедено сегодня» в целях считается равным 0.</div>
+        {% else %}
+          <button class="btn btn-outline-danger mt-3 ms-2" name="action" value="stop_tracking">Выключить трекинг целей</button>
+          <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" 
+                title="Трекер помогает следить за дневной нормой калорий и БЖУ. После включения все блюда, отмеченные для трекинга, будут автоматически учитываться в вашей дневной статистике. Вы можете исключить отдельные блюда из трекинга при их добавлении.">
+            <i class="bi bi-question-circle text-muted" style="cursor: help;"></i>
+          </span>
+          <div class="text-muted small mt-2">Трекинг включён: учитываем блюда после {{ prof.tracking_enabled_at.strftime("%d.%m.%Y %H:%M") }}.</div>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if targets %}
+<div class="row justify-content-center mt-4">
+  <div class="col-lg-8">
+    <div class="glass p-4">
+      <h5 class="mb-3">Автоматические расчёты</h5>
+      <div class="row text-center g-3">
+        <div class="col-6 col-md-4"><div class="stat"><div class="stat-value">{{ targets.bmr }}</div><div class="stat-label">BMR</div></div></div>
+        <div class="col-6 col-md-4"><div class="stat"><div class="stat-value">{{ targets.tdee|round(0) }}</div><div class="stat-label">TDEE</div></div></div>
+        <div class="col-12 col-md-4"><div class="stat"><div class="stat-value">{{ targets.target_cal|round(0) }}</div><div class="stat-label">цель ккал/день</div></div></div>
+      </div>
+      <table class="table table-light-text">
+        <tr><th>Белки</th><td>{{ targets.p_g }} г ({{ targets.p_pct }}%)</td></tr>
+        <tr><th>Жиры</th><td>{{ targets.f_g }} г ({{ targets.f_pct }}%)</td></tr>
+        <tr><th>Углеводы</th><td>{{ targets.c_g }} г ({{ targets.c_pct }}%)</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

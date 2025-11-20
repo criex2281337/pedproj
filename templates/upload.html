@@ -1,0 +1,44 @@
+
+{% extends "base.html" %}
+{% block title %}Загрузить фото{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="glass p-4">
+      <h2 class="mb-4"><i class="bi bi-cloud-upload"></i> Загрузить фото блюда</h2>
+      <form method="post" enctype="multipart/form-data" id="uploadForm">
+        <div class="mb-3">
+          <input class="form-control form-control-lg" type="file" name="photo" accept="image/*" required id="photoInput">
+        </div>
+        <div class="mb-3 form-check">
+          <input type="hidden" name="count_in_tracking" value="off">
+          <input class="form-check-input" type="checkbox" name="count_in_tracking" id="countInTracking" value="on" checked>
+          <label class="form-check-label" for="countInTracking">
+            Учитывать в трекинге целей
+            <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" 
+                  title="Если отмечено, это блюдо будет учитываться в вашей дневной статистике калорий и БЖУ. Снимите галочку, если это фото для друга или просто для справки.">
+              <i class="bi bi-question-circle text-muted" style="cursor: help;"></i>
+            </span>
+          </label>
+          <small class="text-muted d-block">Снимите галочку, если это фото для друга или просто для справки</small>
+        </div>
+        <button class="btn btn-accent" type="submit" id="submitBtn">
+          <span id="submitText">Анализировать</span>
+          <span id="submitSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+        </button>
+        <p class="text-muted small mt-2">Файл ≤ 10 МБ. Фото автоматически уменьшается до разумного размера для быстрого анализа.</p>
+      </form>
+      <script>
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+          const btn = document.getElementById('submitBtn');
+          const text = document.getElementById('submitText');
+          const spinner = document.getElementById('submitSpinner');
+          btn.disabled = true;
+          text.textContent = 'Анализирую...';
+          spinner.classList.remove('d-none');
+        });
+      </script>
+    </div>
+  </div>
+</div>
+{% endblock %}

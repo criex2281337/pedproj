@@ -1,0 +1,33 @@
+
+{% extends "base.html" %}
+{% block title %}Регистрация{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="glass p-4">
+      <h2 class="mb-3 text-center">Создать аккаунт</h2>
+      <p class="text-muted text-center mb-4">
+        Укажите email и пароль, а затем заполните профиль — мы рассчитаем вашу норму калорий и БЖУ.
+      </p>
+      <form method="post">
+        <div class="mb-3">
+          <label class="form-label">Имя</label>
+          <input class="form-control" name="name" placeholder="Как вас называть?" maxlength="60">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input class="form-control" type="email" name="email" placeholder="you@example.com" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Пароль</label>
+          <input class="form-control" type="password" name="password" placeholder="Минимум 6 символов" required>
+        </div>
+        <div class="d-grid gap-2 mt-3">
+          <button class="btn btn-accent">Зарегистрироваться</button>
+          <a class="btn btn-link" href="{{ url_for('login') }}">У меня уже есть аккаунт</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

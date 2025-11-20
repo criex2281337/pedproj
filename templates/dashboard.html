@@ -1,0 +1,92 @@
+
+{% extends "base.html" %}
+{% block title %}Дашборд{% endblock %}
+{% block content %}
+
+{% if today_summary %}
+<div class="glass p-4 mb-4">
+  <h2 class="mb-3">
+    Трекер за сегодня
+    <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" 
+          title="Трекер показывает, сколько калорий и макронутриентов вы съели сегодня из вашей дневной нормы. Учитываются только блюда, отмеченные для трекинга. Вы можете исключить блюдо из трекинга в его деталях.">
+      <i class="bi bi-question-circle text-muted" style="cursor: help;"></i>
+    </span>
+  </h2>
+  <p class="mb-1">
+    Съедено: <strong>{{ today_summary.eaten.cal|round(0) }} ккал</strong>
+    {% if today_summary.target_cal %}
+      из {{ today_summary.target_cal|round(0) }} ккал
+    {% endif %}
+  </p>
+  {% if today_summary.target_cal %}
+  {% set progress = (today_summary.eaten.cal / today_summary.target_cal * 100) if today_summary.target_cal > 0 else 0 %}
+  <div class="progress" style="height: 10px;">
+    <div class="progress-bar" role="progressbar" style="width: {{ progress if progress < 100 else 100 }}%;"></div>
+  </div>
+  <p class="mt-2 mb-0 text-muted">
+    Осталось примерно {{ today_summary.remaining_cal|round(0) }} ккал на сегодня.
+  </p>
+  {% endif %}
+</div>
+{% endif %}
+{% if chart.labels|length > 1 %}
+<div class="glass p-4">
+  <h2 class="mb-4">Сводка по дням</h2>
+  <canvas id="calChart" height="120"></canvas>
+</div>
+{% endif %}
+
+<h3 class="mt-5 mb-3">Последние блюда (по фото)</h3>
+<div class="row g-3">
+  {% for m in meals_photo %}
+  <div class="col-md-6 col-lg-4">
+    <div class="glass p-2 h-100">
+      <div class="meal-photo-container">
+        <img src="{{ url_for('uploaded_file', filename=m.filename) }}" class="meal-photo-img rounded" alt="meal">
+      </div>
+      <div class="p-3">
+        <h5 class="mb-1">{{ m.dish_name or "Блюдо" }}</h5>
+        <div class="text-muted small">{{ m.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+        <div class="mt-2">Ккал: {{ m.calories_kcal|round(0) if m.calories_kcal else "—" }}</div>
+        <a class="btn btn-outline-accent btn-sm mt-2" href="{{ url_for('meal_detail', meal_id=m.id) }}">Подробнее</a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+    <p class="text-muted">Нет записей. Загрузите первое фото.</p>
+  {% endfor %}
+</div>
+
+<h3 class="mt-5 mb-3">Последние блюда (вручную)</h3>
+<div class="row g-3">
+  {% for m in meals_manual %}
+  <div class="col-md-6 col-lg-4">
+    <div class="glass p-3 h-100">
+      <h5 class="mb-1">{{ m.name }}</h5>
+      <div class="text-muted small">{{ m.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+      <div class="mt-2">Ккал: {{ m.calories_kcal|round(0) }}{% if m.proteins_g is not none %}, Б: {{ m.proteins_g|round(0) }}{% endif %}{% if m.fats_g is not none %}, Ж: {{ m.fats_g|round(0) }}{% endif %}{% if m.carbs_g is not none %}, У: {{ m.carbs_g|round(0) }}{% endif %}</div>
+    </div>
+  </div>
+  {% else %}
+    <p class="text-muted">Пока нет ручных записей. <a href="{{ url_for('manual_add') }}">Добавить?</a></p>
+  {% endfor %}
+</div>
+
+<script>
+const cfg = {{ chart|tojson }};
+const ctx = document.getElementById('calChart');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: cfg.labels,
+    datasets: [
+      {label: 'Калории', data: cfg.calories, fill: true},
+      {label: 'Белки (г)', data: cfg.proteins, fill: false},
+      {label: 'Жиры (г)', data: cfg.fats, fill: false},
+      {label: 'Углеводы (г)', data: cfg.carbs, fill: false},
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, tension: 0.3 }
+});
+</script>
+{% endblock %}

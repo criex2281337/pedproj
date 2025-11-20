@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Админ-панель{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <div class="glass p-4">
+      <h2 class="mb-4"><i class="bi bi-shield-lock"></i> Админ-панель</h2>
+      
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value text-info">{{ stats.total_users }}</div>
+            <div class="stat-label">Пользователей</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value text-success">{{ stats.total_meals }}</div>
+            <div class="stat-label">Блюд (фото)</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value text-warning">{{ stats.total_manual }}</div>
+            <div class="stat-label">Блюд (вручную)</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value text-primary">{{ stats.active_tracking }}</div>
+            <div class="stat-label">С трекингом</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat stat-admin">
+            <div class="stat-value text-warning">{{ stats.total_admins }}</div>
+            <div class="stat-label">Администраторов</div>
+          </div>
+        </div>
+      </div>
+
+      <h4 class="mb-3">Пользователи</h4>
+      <div class="table-responsive">
+        <table class="table align-middle table-light-text table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Email</th>
+              <th>Имя</th>
+              <th>Админ</th>
+              <th>Профиль</th>
+              <th>Блюд (фото)</th>
+              <th>Блюд (вручную)</th>
+              <th>Создан</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+            <tr>
+              <td><strong>{{ u.id }}</strong></td>
+              <td>{{ u.email }}</td>
+              <td>{{ u.display_name }}</td>
+              <td>
+                {% if u.is_admin %}
+                  <span class="badge bg-warning text-dark">Админ</span>
+                {% else %}
+                  <span class="badge bg-secondary">Пользователь</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.profile %}
+                  {% if u.profile.tracking_enabled_at %}
+                    <span class="badge bg-success">Трекинг</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Без трекинга</span>
+                  {% endif %}
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td>{{ u.meals_photo|length }}</td>
+              <td>{{ u.meals_manual|length }}</td>
+              <td class="small">{{ u.created_at.strftime("%d.%m.%Y %H:%M") if u.created_at else "—" }}</td>
+              <td>
+                <a class="btn btn-sm btn-outline-accent" href="{{ url_for('admin_user_detail', user_id=u.id) }}">
+                  <i class="bi bi-eye"></i> Детали
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

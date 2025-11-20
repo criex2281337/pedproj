@@ -1,0 +1,42 @@
+
+{% extends "base.html" %}
+{% block title %}План питания{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="glass p-4">
+      <h2 class="mb-3">Ваши цели</h2>
+      {% if not targets %}
+        <p class="text-muted">Заполните профиль и включите трекинг, чтобы рассчитать цели и остаток.</p>
+        <a class="btn btn-accent" href="{{ url_for('profile') }}">Открыть профиль</a>
+      {% else %}
+        <div class="row text-center g-3">
+          <div class="col-6"><div class="stat"><div class="stat-value">{{ targets.target_cal|round(0) }}</div><div class="stat-label">ккал/день</div></div></div>
+          <div class="col-6"><div class="stat"><div class="stat-value">{{ targets.tdee|round(0) }}</div><div class="stat-label">TDEE</div></div></div>
+        </div>
+        <table class="table mt-3 table-light-text">
+          <tr><th>Белки</th><td>{{ targets.p_g }} г ({{ targets.p_pct }}%)</td></tr>
+          <tr><th>Жиры</th><td>{{ targets.f_g }} г ({{ targets.f_pct }}%)</td></tr>
+          <tr><th>Углеводы</th><td>{{ targets.c_g }} г ({{ targets.c_pct }}%)</td></tr>
+        </table>
+      {% endif %}
+    </div>
+
+    <div class="glass p-4 mt-4">
+      <h4 class="mb-3">
+        Сегодня съедено (в целях)
+        <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="right" 
+              title="Показывает сумму калорий и макронутриентов из всех блюд, добавленных сегодня и отмеченных для трекинга. Сравните с вашими целями выше.">
+          <i class="bi bi-question-circle text-muted" style="cursor: help;"></i>
+        </span>
+      </h4>
+      <table class="table table-light-text">
+        <tr><th>Калории</th><td>{{ sum_today.cal|round(0) }}</td></tr>
+        <tr><th>Белки</th><td>{{ sum_today.p|round(0) }} г</td></tr>
+        <tr><th>Жиры</th><td>{{ sum_today.f|round(0) }} г</td></tr>
+        <tr><th>Углеводы</th><td>{{ sum_today.c|round(0) }} г</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

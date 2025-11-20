@@ -1,0 +1,49 @@
+
+{% extends "base.html" %}
+{% block title %}Калории по фото{% endblock %}
+{% block content %}
+<section class="hero glass p-5 mb-4">
+  <div class="row align-items-center">
+    <div class="col-lg-7">
+      <h1 class="display-5 fw-bold mb-3">Калории по фото + трекинг питания</h1>
+      <p class="lead text-muted">
+        Загрузите фото тарелки — нейросеть оценит состав блюда, массу порции и калории. 
+        Мы поможем вести дневник питания и следить за нормой калорий и БЖУ.
+      </p>
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <a href="{{ url_for('upload') }}" class="btn btn-accent btn-lg">
+          <i class="bi bi-cloud-upload"></i> Загрузить фото блюда
+        </a>
+        {% if not current_user %}
+          <a href="{{ url_for('register') }}" class="btn btn-outline-accent btn-lg">
+            Создать аккаунт
+          </a>
+        {% else %}
+          <a href="{{ url_for('dashboard') }}" class="btn btn-outline-accent btn-lg">
+            <i class="bi bi-speedometer2"></i> Мой дашборд
+          </a>
+        {% endif %}
+      </div>
+      <div class="row mt-4 g-3">
+        <div class="col-sm-4">
+          <div class="small text-muted">1. Загрузите фото</div>
+          <div>Мы определим продукты, вес порции и калории.</div>
+        </div>
+        <div class="col-sm-4">
+          <div class="small text-muted">2. Ведите дневник</div>
+          <div>Блюда автоматически попадают в историю и учитываются в трекинге.</div>
+        </div>
+        <div class="col-sm-4">
+          <div class="small text-muted">3. Следите за нормой</div>
+          <div>Сравнивайте съеденное с вашей дневной нормой калорий и БЖУ.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5 mt-4 mt-lg-0">
+      <div class="preview rounded overflow-hidden shadow-xl">
+        <img src="{{ url_for('static', filename='uploads/IMG_1890.JPG') }}" class="img-fluid" alt="demo">
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
